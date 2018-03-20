@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 
-
+int a = 0;
 int l = 0;
 int w = 0;
 int c = 0;
@@ -10,6 +10,9 @@ int o = 0;
 int lineCnt = 0;  //行数
 int wordCnt = 0;  //单词数
 int charCnt = 0;   //字符数
+int codeLine = 0;  //代码行
+int emptyLine = 0;  //空行
+int comtLine = 0;  //注释行
 
 int countFile(char *filename){
     FILE *fp;  // 指向文件的指针
@@ -53,22 +56,23 @@ int countFile(char *filename){
     return 1;
 }
 
-int writeOutput(char *filename)
+int writeOutput(char *outFile, char *inFile)
 {
-    FILE *fpWrite = fopen(filename,"w");
+    FILE *fpWrite = fopen(outFile,"w");
     if (fpWrite == NULL)
         return -1;
+    fprintf(fpWrite, "%s,", inFile);
     if (l)
     {
-        fprintf(fpWrite, "Lines: %d\n", lineCnt);
+        fprintf(fpWrite, "行数: %d,", lineCnt);
     }
     if (w)
     {
-        fprintf(fpWrite, "Words: %d\n", wordCnt);
+        fprintf(fpWrite, "单词数: %d,", wordCnt);
     }
     if (c)
     {
-        fprintf(fpWrite, "Chars: %d\n", charCnt);
+        fprintf(fpWrite, "字符数: %d\n\n", charCnt);
     }
     fclose(fpWrite);
 }
@@ -83,11 +87,15 @@ int main(int argc,char *argv[])
     char outputFileName[50];
 
 
-    while((opt=getopt(argc,argv,"a:l:w:c:o:")) != -1)
+    while((opt=getopt(argc,argv,"a:b:l:w:c:o:")) != -1)
     {
         switch(opt)
         {
             case 'a':
+                a = 1;
+                strcpy(inputFileName,optarg);
+                break;
+            case 'b':
                 l = w = c = 1;
                 strcpy(inputFileName,optarg);
                 break;
@@ -109,22 +117,8 @@ int main(int argc,char *argv[])
         }
     }
     countFile(inputFileName);
-    if (o)
-        writeOutput(outputFileName);
-    else
-    {
-        if (l)
-        {
-            printf("Lines: %d\n", lineCnt);
-        }
-        if (w)
-        {
-            printf("Words: %d\n", wordCnt);
-        }
-        if (c)
-        {
-            printf("Chars: %d\n", charCnt);
-        }   
-    }
+    if (o == 0)
+        strcpy(outputFileName, "result.txt");
+    writeOutput(outputFileName, inputFileName);
     return 0;
 }
